@@ -1,0 +1,58 @@
+#Mongo DB
+
+
+Download  big-data-3
+
+extract it
+
+Run ./setup.sh
+
+then inside mongo db directory - mongodb/bin/mongod --dbpath db
+
+
+After connection is established 
+Open client on another terminal
+
+Run command - mongodb/bin/mongo
+
+
+
+
+
+db.users.count()
+
+
+db.users.findOne() -- prints the first record
+
+db.users.find({},{_id: 0})
+db.users.findOne({},{user_name : 1,tweet_ID : 1})
+
+db.users.distinct("user_name")
+db.users.find({user_name : "calrowlands"})
+
+db.users.find({user_name : "calrowlands"}).pretty()
+
+db.users.find({user_name : "calrowlands"},{tweet_ID:1})
+
+db.users.find({user_name : "calrowlands"},{tweet_ID:1,_id:0})
+
+db.users.find({tweet_text:/FIFA/})
+db.users.find({tweet_text:/FIFA/}).count()
+
+db.users.createIndex({"tweet_text":"text"})
+
+db.users.find({$text:{$search:"FIFA"}}).count()#duplication due to multiple presence in the index files, count of records here will be larger
+
+db.users.find({tweet_mentioned_count:{$gt:6}})
+
+db.users.find({$where:"this.tweet_mentioned_count > this.tweet_followers_count"}).count()
+
+db.users.find({$and :[{tweet_text=/FIFA/},{tweet_mentioned_count:{$gt:4}}]})
+
+db.users.find({$and :[{tweet_text:/FIFA/},{tweet_mentioned_count:{$gt:4}}]}).pretty()
+
+
+
+
+
+
