@@ -1,0 +1,16 @@
+Hadoop Mapreduce Commands
+
+
+cd /usr/lib
+
+cd hadoop-mapreduce
+
+hadoop jar hadoop-mapreduce-examples-3.1.1.jar wordmedian test.txt testmedian
+
+hadoop jar hadoop-mapreduce-examples-3.1.1.jar wordcount test.txt testcount
+
+hadoop jar hadoop-mapreduce-examples-3.1.1.jar wordmean test.txt testmean
+
+
+
+Link for mapreduce functions http://www.informit.com/articles/article.aspx?p=2190194&seqNum=3
