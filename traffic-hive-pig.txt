@@ -1,0 +1,55 @@
+rowData = LOAD '/home/ektashah/traffic.csv' USING PigStorage(',') AS (year:int, cp:int, start:chararray, end:chararray, distance:float, cycles:float, motorbikes:float, cars:float, vans:float, trucks:float); 
+
+rowData1= FILTER rowData BY year IS NOT NULL;
+YearGroup = GROUP rowData1 BY year;
+YearlyTotal = FOREACH YearGroup GENERATE group as year, SUM(rowData1.distance) AS totaldistance, SUM(rowData1.vans) AS totalvans, SUM(rowData1.trucks) AS totaltrucks;
+DUMP YearlyTotal;
+SortedTotal = ORDER YearlyTotal BY year;
+STORE SortedTotal INTO '/home/ektashah/annual_freight_traffic' USING PigStorage(' ');
+
+Python in Pig
+REGISTER '/home/ektashah/Pig_udf.py' USING jython AS convert_distance;
+rowData = LOAD '/home/ektashah/annual_freight_traffic' as (traffic:chararray);
+ConvTraffic = FOREACH rowData GENERATE FLATTEN(convert_distance.to_miles(traffic));
+STORE ConvTraffic INTO '/home/ektashah/freight_miles' USING PigStorage(' ');
+
+Hive in Pig
+cat create_table.hive
+Drop table if exists freight;
+create external table freight(
+year int,
+miles float,
+vans float,
+trucks float)
+row format delimited fields terminated by '\t'
+STored as textfile location '/home/ektashah/freight_miles';
+hive -i create_table.hive
+add file hdfs:///data/total_freight.py
+
+SELECT TRANSFORM(year,miles,vans,trucks)
+USING 'python total_freight.py'
+AS (year INT, miles FLOAT, total_freight FLOAT)
+FROM freight;
+
+
+UDFS- 
+@outputSchema("a_traffic: {(year:int, miles:float, vans:float,trucks:float)}")
+def to_miles(km_traffic):
+	year, kms, vans, trucks = km_traffic.split(' ')
+	miles = float(kms)*0.62
+	return int(year), miles, float(vans), float(trucks)
+
+
+#!/usr/bin/env python
+
+import sys
+import string
+
+while True:
+	line=sys.stdin.readline()
+	if not line:
+		break
+	row=string.strip(line, "\n")
+	year, miles, vans, trucks = string.split(row,"\t")
+	total_freight = float(vans)+float(trucks)
+	print "\t".join([year, miles, str(total_freight)])
